@@ -43,30 +43,77 @@ class _HomeViewState extends ConsumerState<_HomeView> {
           child: CircularProgressIndicator(backgroundColor: Colors.white));
     }
 
-    return Column(
-      children: [
-        // APPBAR
-        const CustomAppbar(),
+    return CustomScrollView(
+      slivers: [
+        // APP BAR que se esconde al hacer scroll hacia abajo y aparece al hacer scroll hacia arriba
+        const SliverAppBar(
+            floating: true,
+            backgroundColor: Colors.white,
+            flexibleSpace: FlexibleSpaceBar(
+              centerTitle: true,
+              title: CustomAppbar(),
+            )),
+        // Listado de elementos que se pueden hacer scroll
+        SliverList(
+            delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            return Column(
+              children: [
+                // APPBAR
+                // const CustomAppbar(),
 
-        MoviesSlideshow(movies: slideShowMovies),
+                MoviesSlideshow(movies: slideShowMovies),
 
-        // MOVIES HORIZONTAL LISTVIEW
-        MovieHorizontalListview(
-          movies: nowPlayingMovies,
-          title: 'En cartelera',
-          subTitle: 'Ver más',
-        ),
+                // MOVIES HORIZONTAL LISTVIEW
+                MovieHorizontalListview(
+                  movies: nowPlayingMovies,
+                  title: 'En cartelera',
+                  subTitle: 'Hoy',
+                  loadNextPage: () {
+                    ref.read(nowPlayinMoviesProvider.notifier).loadNextPage();
+                  },
+                ),
+                MovieHorizontalListview(
+                  movies: nowPlayingMovies,
+                  title: 'Proximamente',
+                  subTitle: 'Em este mes',
+                  loadNextPage: () {
+                    ref.read(nowPlayinMoviesProvider.notifier).loadNextPage();
+                  },
+                ),
+                MovieHorizontalListview(
+                  movies: nowPlayingMovies,
+                  title: 'Polulares',
+                  // subTitle: 'Em este mes',
+                  loadNextPage: () {
+                    ref.read(nowPlayinMoviesProvider.notifier).loadNextPage();
+                  },
+                ),
+                MovieHorizontalListview(
+                  movies: nowPlayingMovies,
+                  title: 'Mejores calificadas',
+                  subTitle: 'Siempre',
+                  loadNextPage: () {
+                    ref.read(nowPlayinMoviesProvider.notifier).loadNextPage();
+                  },
+                ),
+                const SizedBox(height: 20),
 
-        // Expanded(
-        //   child: ListView.builder(
-        //     itemCount: nowPlayingMovies.length,
-        //     itemBuilder: (context, index) {
-        //       return ListTile(
-        //         title: Text(nowPlayingMovies[index].title),
-        //       );
-        //     },
-        //   ),
-        // )
+                // Expanded(
+                //   child: ListView.builder(
+                //     itemCount: nowPlayingMovies.length,
+                //     itemBuilder: (context, index) {
+                //       return ListTile(
+                //         title: Text(nowPlayingMovies[index].title),
+                //       );
+                //     },
+                //   ),
+                // )
+              ],
+            );
+          },
+          childCount: 1,
+        ))
       ],
     );
   }
