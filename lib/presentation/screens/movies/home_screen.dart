@@ -37,6 +37,12 @@ class _HomeViewState extends ConsumerState<_HomeView> {
 
   @override
   Widget build(BuildContext context) {
+    final initialLoading = ref.watch(initialLoadingProvider);
+
+    if (initialLoading) {
+      return const FullScreenLoader();
+    }
+
     final slideShowMovies = ref.watch(moviesSlideshowProvider);
     final nowPlayingMovies = ref.watch(nowPlayinMoviesProvider);
     final popularMovies = ref.watch(popularMoviesProvider);
@@ -61,65 +67,66 @@ class _HomeViewState extends ConsumerState<_HomeView> {
             )),
         // Listado de elementos que se pueden hacer scroll
         SliverList(
-            delegate: SliverChildBuilderDelegate(
-          (context, index) {
-            return Column(
-              children: [
-                // APPBAR
-                // const CustomAppbar(),
+          delegate: SliverChildBuilderDelegate(
+            (context, index) {
+              return Column(
+                children: [
+                  // APPBAR
+                  // const CustomAppbar(),
 
-                MoviesSlideshow(movies: slideShowMovies),
+                  MoviesSlideshow(movies: slideShowMovies),
 
-                // MOVIES HORIZONTAL LISTVIEW
-                MovieHorizontalListview(
-                  movies: nowPlayingMovies,
-                  title: 'En cartelera',
-                  subTitle: 'Hoy',
-                  loadNextPage: () {
-                    ref.read(nowPlayinMoviesProvider.notifier).loadNextPage();
-                  },
-                ),
-                MovieHorizontalListview(
-                  movies: upcomingMovies,
-                  title: 'Proximamente',
-                  subTitle: 'Em este mes',
-                  loadNextPage: () {
-                    ref.read(upcomingMoviesProvider.notifier).loadNextPage();
-                  },
-                ),
-                MovieHorizontalListview(
-                  movies: popularMovies,
-                  title: 'Polulares',
-                  // subTitle: 'Em este mes',
-                  loadNextPage: () {
-                    ref.read(popularMoviesProvider.notifier).loadNextPage();
-                  },
-                ),
-                MovieHorizontalListview(
-                  movies: topRatedMovies,
-                  title: 'Mejores calificadas',
-                  subTitle: 'Siempre',
-                  loadNextPage: () {
-                    ref.read(topRatedMoviesProvider.notifier).loadNextPage();
-                  },
-                ),
-                const SizedBox(height: 20),
+                  // MOVIES HORIZONTAL LISTVIEW
+                  MovieHorizontalListview(
+                    movies: nowPlayingMovies,
+                    title: 'En cartelera',
+                    subTitle: 'Hoy',
+                    loadNextPage: () {
+                      ref.read(nowPlayinMoviesProvider.notifier).loadNextPage();
+                    },
+                  ),
+                  MovieHorizontalListview(
+                    movies: upcomingMovies,
+                    title: 'Proximamente',
+                    subTitle: 'Em este mes',
+                    loadNextPage: () {
+                      ref.read(upcomingMoviesProvider.notifier).loadNextPage();
+                    },
+                  ),
+                  MovieHorizontalListview(
+                    movies: popularMovies,
+                    title: 'Polulares',
+                    // subTitle: 'Em este mes',
+                    loadNextPage: () {
+                      ref.read(popularMoviesProvider.notifier).loadNextPage();
+                    },
+                  ),
+                  MovieHorizontalListview(
+                    movies: topRatedMovies,
+                    title: 'Mejores calificadas',
+                    subTitle: 'Siempre',
+                    loadNextPage: () {
+                      ref.read(topRatedMoviesProvider.notifier).loadNextPage();
+                    },
+                  ),
+                  const SizedBox(height: 20),
 
-                // Expanded(
-                //   child: ListView.builder(
-                //     itemCount: nowPlayingMovies.length,
-                //     itemBuilder: (context, index) {
-                //       return ListTile(
-                //         title: Text(nowPlayingMovies[index].title),
-                //       );
-                //     },
-                //   ),
-                // )
-              ],
-            );
-          },
-          childCount: 1,
-        ))
+                  // Expanded(
+                  //   child: ListView.builder(
+                  //     itemCount: nowPlayingMovies.length,
+                  //     itemBuilder: (context, index) {
+                  //       return ListTile(
+                  //         title: Text(nowPlayingMovies[index].title),
+                  //       );
+                  //     },
+                  //   ),
+                  // )
+                ],
+              );
+            },
+            childCount: 1,
+          ),
+        )
       ],
     );
   }
