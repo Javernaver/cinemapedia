@@ -1,6 +1,9 @@
+import 'package:cinemapedia/domain/entities/movie.dart';
+import 'package:cinemapedia/presentation/providers/providers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class MovieScreen extends StatelessWidget {
+class MovieScreen extends ConsumerStatefulWidget {
   static const name = 'movie-screen';
   final String movieId;
 
@@ -10,10 +13,33 @@ class MovieScreen extends StatelessWidget {
   });
 
   @override
+  MovieScreenState createState() => MovieScreenState();
+}
+
+class MovieScreenState extends ConsumerState<MovieScreen> {
+  @override
+  void initState() {
+    super.initState();
+    ref.read(movieInfoProvider.notifier).loadMovie(widget.movieId);
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // Buscamos la pelicula en el estado
+    final Movie? movies = ref.watch(movieInfoProvider)[widget.movieId];
+
+    // Si no existe la pelicula en el estado, mostramos un loader
+    if (movies == null) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(movieId),
+        title: Text(widget.movieId),
       ),
     );
   }
