@@ -10,7 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 Future<void> main() async {
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     systemNavigationBarColor: Colors.blue,
-    statusBarColor: Colors.white,
+    statusBarColor: Colors.transparent,
   ));
   if (kReleaseMode) {
     await dotenv.load(fileName: '.env.production');
