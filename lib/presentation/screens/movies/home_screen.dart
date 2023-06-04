@@ -49,12 +49,6 @@ class _HomeViewState extends ConsumerState<_HomeView> {
     final topRatedMovies = ref.watch(topRatedMoviesProvider);
     final upcomingMovies = ref.watch(upcomingMoviesProvider);
 
-    // LOADING
-    if (slideShowMovies.isEmpty) {
-      return const Center(
-          child: CircularProgressIndicator(backgroundColor: Colors.white));
-    }
-
     return CustomScrollView(
       slivers: [
         // APP BAR que se esconde al hacer scroll hacia abajo y aparece al hacer scroll hacia arriba
