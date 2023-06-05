@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:animate_do/animate_do.dart';
 import 'package:cinemapedia/config/helpers/human_formats.dart';
 import 'package:cinemapedia/domain/entities/movie.dart';
@@ -7,8 +9,31 @@ typedef SearchMoviesCallback = Future<List<Movie>> Function(String query);
 
 class SearchMovieDelegate extends SearchDelegate<Movie?> {
   final SearchMoviesCallback searchMovies;
+  final List<Movie> initialMovies;
 
-  SearchMovieDelegate({required this.searchMovies});
+  StreamController<List<Movie>> debounceMovies = StreamController.broadcast();
+  Timer? _debounceTimer;
+
+  SearchMovieDelegate(
+      {required this.searchMovies, required this.initialMovies});
+
+  void clearStreams() {
+    debounceMovies.close();
+  }
+
+  void _onQueryChanged(String query) {
+    if (_debounceTimer?.isActive ?? false) {
+      _debounceTimer?.cancel();
+    }
+    _debounceTimer = Timer(const Duration(milliseconds: 500), () async {
+      // if (query.isEmpty) {
+      //   debounceMovies.add([]);
+      //   return;
+      // }
+      final movies = await searchMovies(query);
+      debounceMovies.add(movies);
+    });
+  }
 
   @override
   String get searchFieldLabel => 'Buscar pelicula';
@@ -42,7 +67,10 @@ class SearchMovieDelegate extends SearchDelegate<Movie?> {
   @override
   Widget? buildLeading(BuildContext context) {
     return IconButton(
-      onPressed: () => close(context, null),
+      onPressed: () {
+        clearStreams();
+        close(context, null);
+      },
       icon: const Icon(Icons.arrow_back),
     );
   }
@@ -54,8 +82,12 @@ class SearchMovieDelegate extends SearchDelegate<Movie?> {
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    return FutureBuilder(
-      future: searchMovies(query),
+    _onQueryChanged(query);
+
+    return StreamBuilder(
+      // future: searchMovies(query),
+      initialData: initialMovies,
+      stream: debounceMovies.stream,
       builder: (context, snapshot) {
         final movies = snapshot.data ?? [];
 
@@ -63,7 +95,10 @@ class SearchMovieDelegate extends SearchDelegate<Movie?> {
           itemCount: movies.length,
           itemBuilder: (context, index) => _MovieItem(
             movie: movies[index],
-            onMovieSelected: close,
+            onMovieSelected: (context, movie) {
+              clearStreams();
+              close(context, movie);
+            },
           ),
         );
       },
