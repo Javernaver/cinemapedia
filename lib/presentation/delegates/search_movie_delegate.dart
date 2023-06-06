@@ -9,9 +9,12 @@ typedef SearchMoviesCallback = Future<List<Movie>> Function(String query);
 
 class SearchMovieDelegate extends SearchDelegate<Movie?> {
   final SearchMoviesCallback searchMovies;
-  final List<Movie> initialMovies;
+  List<Movie> initialMovies;
 
   StreamController<List<Movie>> debounceMovies = StreamController.broadcast();
+
+  StreamController<bool> isLoadingStream = StreamController.broadcast();
+
   Timer? _debounceTimer;
 
   SearchMovieDelegate(
@@ -19,9 +22,11 @@ class SearchMovieDelegate extends SearchDelegate<Movie?> {
 
   void clearStreams() {
     debounceMovies.close();
+    isLoadingStream.close();
   }
 
   void _onQueryChanged(String query) {
+    isLoadingStream.add(true);
     if (_debounceTimer?.isActive ?? false) {
       _debounceTimer?.cancel();
     }
@@ -30,60 +35,18 @@ class SearchMovieDelegate extends SearchDelegate<Movie?> {
       //   debounceMovies.add([]);
       //   return;
       // }
+
       final movies = await searchMovies(query);
+      initialMovies = movies;
       debounceMovies.add(movies);
+      isLoadingStream.add(false);
     });
   }
 
   @override
   String get searchFieldLabel => 'Buscar pelicula';
 
-  // * Botones de accion (Derecha del appbar)
-  @override
-  List<Widget>? buildActions(BuildContext context) {
-    return [
-      // if (query.isNotEmpty)
-      FadeIn(
-        animate: query.isNotEmpty,
-        duration: const Duration(milliseconds: 200),
-        child: IconButton(
-          onPressed: () => query = '',
-          icon: const Icon(Icons.clear),
-        ),
-      ),
-      FadeIn(
-        animate: query.isNotEmpty,
-        duration: const Duration(milliseconds: 200),
-        child: const VerticalDivider(
-          thickness: 1,
-          indent: 15,
-          endIndent: 15,
-        ),
-      ),
-    ];
-  }
-
-  // * Boton de regreso (Izquierda del appbar)
-  @override
-  Widget? buildLeading(BuildContext context) {
-    return IconButton(
-      onPressed: () {
-        clearStreams();
-        close(context, null);
-      },
-      icon: const Icon(Icons.arrow_back),
-    );
-  }
-
-  @override
-  Widget buildResults(BuildContext context) {
-    return const Text('buildResults');
-  }
-
-  @override
-  Widget buildSuggestions(BuildContext context) {
-    _onQueryChanged(query);
-
+  Widget buildResultsAndSugestions() {
     return StreamBuilder(
       // future: searchMovies(query),
       initialData: initialMovies,
@@ -103,6 +66,63 @@ class SearchMovieDelegate extends SearchDelegate<Movie?> {
         );
       },
     );
+  }
+
+  // * Botones de accion (Derecha del appbar)
+  @override
+  List<Widget>? buildActions(BuildContext context) {
+    return [
+      StreamBuilder(
+        stream: isLoadingStream.stream,
+        initialData: false,
+        builder: (context, snapshot) {
+          if (snapshot.data ?? false) {
+            return SpinPerfect(
+              duration: const Duration(seconds: 10),
+              spins: 10,
+              infinite: true,
+              child: IconButton(
+                onPressed: () => query = '',
+                icon: const Icon(Icons.refresh_rounded),
+              ),
+            );
+          }
+          return // if (query.isNotEmpty)
+              FadeIn(
+            animate: query.isNotEmpty,
+            duration: const Duration(milliseconds: 200),
+            child: IconButton(
+              onPressed: () => query = '',
+              icon: const Icon(Icons.clear),
+            ),
+          );
+        },
+      ),
+    ];
+  }
+
+  // * Boton de regreso (Izquierda del appbar)
+  @override
+  Widget? buildLeading(BuildContext context) {
+    return IconButton(
+      onPressed: () {
+        clearStreams();
+        close(context, null);
+      },
+      icon: const Icon(Icons.arrow_back),
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    return buildResultsAndSugestions();
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    _onQueryChanged(query);
+
+    return buildResultsAndSugestions();
   }
 }
 
