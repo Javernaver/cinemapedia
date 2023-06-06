@@ -29,9 +29,9 @@ class CustomBottonNavigation extends StatelessWidget {
 
   void onItemTapped(BuildContext context, int index) {
     const idexes = {
-      0: '/',
-      1: '/',
-      2: '/favorites',
+      0: '/home/0',
+      1: '/home/0',
+      2: '/home/2',
     };
 
     context.go(idexes[index] ?? '/');
