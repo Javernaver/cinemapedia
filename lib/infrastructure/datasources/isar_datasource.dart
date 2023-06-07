@@ -11,7 +11,7 @@ class IsarDatasource extends LocalStorageDatasouce {
   }
 
   Future<Isar> openDB() async {
-    final dir = await getApplicationSupportDirectory();
+    final dir = await getApplicationDocumentsDirectory();
 
     if (Isar.instanceNames.isEmpty) {
       return await Isar.open(
@@ -44,8 +44,8 @@ class IsarDatasource extends LocalStorageDatasouce {
   Future<void> toggleFavorite(Movie movie) async {
     final isar = await db;
 
-    final favoriteMovie =
-        await isar.movies.filter().isarIdEqualTo(movie.id).findFirst();
+    final Movie? favoriteMovie =
+        await isar.movies.filter().idEqualTo(movie.id).findFirst();
 
     // Borrar
     if (favoriteMovie != null) {
