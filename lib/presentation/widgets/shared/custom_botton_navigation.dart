@@ -8,9 +8,9 @@ class CustomBottonNavigation extends StatelessWidget {
     final String location = GoRouterState.of(context).location;
 
     const locations = {
-      '/': 0,
-      '/categories': 1,
-      '/favorites': 2,
+      '/home/0': 0,
+      '/home/1': 1,
+      '/home/2': 2,
     };
 
     return locations[location] ?? 0;
